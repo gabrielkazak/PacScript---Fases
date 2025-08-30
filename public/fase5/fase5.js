@@ -363,9 +363,16 @@ e o usuario deve então devolver algo parecido, mas não restrito a algo igual a
 // Pac-Man coleta um ponto
 - pontosTotais = pontosTotais + VALOR_PONTO
 
+OU
+
+- const valor ponto = 1 (int)
+- pontosTotais = 0 (int)
+// Pac-Man coleta um ponto
+- pontosTotais = pontosTotais + valor ponto
+
 Avalie o pseudocódigo fornecido pelo usuário e retorne:
 - Primeiro valor (índice 0): o valor numérico definido como pontuação por coleta de ponto (exemplo: 10).
-- Segundo valor (índice 1): true se o usuário substituiu corretamente esse valor por uma constante (de nome todo em letras maiúsculas) **com o tipo (int)** explicitado ao lado, como por exemplo: PONTOS = 10 (int).
+- Segundo valor (índice 1): true se o usuário substituiu corretamente esse valor por uma constante (de nome todo em letras maiúsculas ou acompanhado de 'const' antes da declaração do nome, qualquer uma das duas é valida) **com o tipo (int) ou inteiro por extenso** explicitado ao lado, como por exemplo: PONTOS = 10 (int) ou 10 inteiro.
 - Terceiro valor (índice 2): Uma **string curta de dica** (2 ou 3 linhas) explicando de forma vaga o que está faltando ou precisa ser ajustado **com base apenas no que foi escrito**.
 
 
@@ -548,7 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }); 
 
-let textoMotivador = ["Nesta fase, você aprenderá sobre a importância das constantes em um código. Enquanto variáveis armazenam valores que mudam ao longo do tempo, constantes guardam valores fixos que nunca devem ser alterados durante a execução. Isso é essencial para manter a lógica do programa segura e evitar bugs difíceis de encontrar.", "Abaixo está um trecho de pseudocódigo com um erro: uma variável foi usada para guardar o valor dos pontos ganhos por coleta, mas ela está sendo sobrescrita acidentalmente em outro ponto do código. Sua missão é identificar esse valor que nunca deveria mudar, mudando sua chamada, de uma variável para uma constante, e excluindo as linhas de código que estão causando problemas.", "Parâmetros de ajuda: É uma boa prática escrever constantes em letra maiúscula, como PONTOS.Lembre-se de colocar o tipo de dado da variável ao seu lado, como pontosTotais = 0 (int)"]
+let textoMotivador = ["Nesta fase, você aprenderá sobre a importância das constantes em um código. Enquanto variáveis armazenam valores que mudam ao longo do tempo, constantes guardam valores fixos que nunca devem ser alterados durante a execução. Isso é essencial para manter a lógica do programa segura e evitar bugs difíceis de encontrar. ->", "Abaixo está um trecho de pseudocódigo com um erro: uma variável foi usada para guardar o valor dos pontos ganhos por coleta, mas ela está sendo sobrescrita acidentalmente em outro ponto do código. Sua missão é identificar esse valor que nunca deveria mudar, mudando sua chamada, de uma variável para uma constante, e excluindo as linhas de código que estão causando problemas. ->", "Parâmetros de ajuda: É uma boa prática escrever constantes em letra maiúscula, como PONTOS.Lembre-se de colocar o tipo de dado da variável ao seu lado, como pontosTotais = 0 (int)"]
 
 let contadorTexto = 0;
 let instrucao = document.querySelector('.instrucao')
@@ -574,3 +581,45 @@ document.querySelector('.proximoTexto').addEventListener('click', ()=>{
     document.querySelector('.proximoTexto').textContent = `Proximo ${contadorTexto+1}/3`
     instrucao.textContent = textoMotivador[contadorTexto]
 })
+
+let gravando = false;
+let recorder;
+let audioChunks = [];
+
+const botaoGravar = document.querySelector('#record-audio');
+
+botaoGravar.addEventListener("click", async () => {
+  if (!gravando) {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recorder = new MediaRecorder(stream);
+    audioChunks = [];
+
+    recorder.ondataavailable = (event) => {
+      audioChunks.push(event.data);
+    };
+
+    recorder.onstop = async () => {
+      const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+      const formData = new FormData();
+      formData.append("file", audioBlob, "audio.webm");
+
+      const response = await fetch("/api/audio", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      console.log("Texto do Whisper:", data.text);
+
+      document.getElementById("codigoUsuario").value += '\n\n' + data.text;
+    };
+
+    recorder.start();
+    gravando = true;
+    botaoGravar.textContent = "⏹️ Parar Gravação";
+  } else {
+    recorder.stop();
+    gravando = false;
+    botaoGravar.textContent = "🎤 Gravar Áudio";
+  }
+});

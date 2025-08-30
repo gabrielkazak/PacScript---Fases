@@ -551,7 +551,7 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('ultimoCaminho', caminhoAtual);
   });  
 
-let textoMotivador = ["Nesta fase, o desafio é criar a base fundamental do jogo: O mapa, o Pac-Man e permitir que ele se movimente pelo mapa, tudo isso, claro, com pseudocódigo.","Na hora de criar o código, seja específico, descreva o mapa com sua quantidade de linhas e colunas e uma cor para as bordas. A respeito do Pac-Man, fale sobre o formato circular dele, a cor e posicione-o centralizado no mapa. E sobre sua movimentação, descreva o plano de movimento dele e para que direções ele pode ir.", "Lembre-se: o computador faz exatamente o que você manda, portanto, ao escrever o pseudocódigo, não basta simplesmente dizer “criar mapa” ou “mover Pac-Man”, cada detalhe precisa ser especificado.", "Parâmetros de ajuda: Linhas = 21, Colunas = 19"]
+let textoMotivador = ["Nesta fase, o desafio é criar a base fundamental do jogo: O mapa, o Pac-Man e permitir que ele se movimente pelo mapa, tudo isso, claro, com pseudocódigo. ->","Na hora de criar o código, seja específico, descreva o mapa com sua quantidade de linhas e colunas e uma cor para as bordas. A respeito do Pac-Man, fale sobre o formato circular dele, a cor e posicione-o centralizado no mapa. E sobre sua movimentação, descreva o plano de movimento dele e para que direções ele pode ir. ->", "Lembre-se: o computador faz exatamente o que você manda, portanto, ao escrever o pseudocódigo, não basta simplesmente dizer “criar mapa” ou “mover Pac-Man”, cada detalhe precisa ser especificado. ->", "Parâmetros de ajuda: Linhas = 21 (Vinte e um), Colunas = 19 (Dezenove)"]
 
 let contadorTexto = 0;
 let instrucao = document.querySelector('.instrucao')
@@ -577,3 +577,45 @@ document.querySelector('.proximoTexto').addEventListener('click', ()=>{
     document.querySelector('.proximoTexto').textContent = `Proximo ${contadorTexto+1}/4`
     instrucao.textContent = textoMotivador[contadorTexto]
 })
+
+let gravando = false;
+let recorder;
+let audioChunks = [];
+
+const botaoGravar = document.querySelector('#record-audio');
+
+botaoGravar.addEventListener("click", async () => {
+  if (!gravando) {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recorder = new MediaRecorder(stream);
+    audioChunks = [];
+
+    recorder.ondataavailable = (event) => {
+      audioChunks.push(event.data);
+    };
+
+    recorder.onstop = async () => {
+      const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+      const formData = new FormData();
+      formData.append("file", audioBlob, "audio.webm");
+
+      const response = await fetch("/api/audio", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      console.log("Texto do Whisper:", data.text);
+
+      document.getElementById("codigoUsuario").value += '\n\n' + data.text;
+    };
+
+    recorder.start();
+    gravando = true;
+    botaoGravar.textContent = "⏹️ Parar Gravação";
+  } else {
+    recorder.stop();
+    gravando = false;
+    botaoGravar.textContent = "🎤 Gravar Áudio";
+  }
+});

@@ -1031,7 +1031,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });  
 
-let textoMotivador = ["Nesta fase, o desafio é implementar um sistema de vidas para o Pac-Man utilizando pseudocódigo. Para isso, você deve declarar uma variável, e utilizando o sinal de igual, armazenar um valor para a quantidade de vidas do personagem, iniciando com um número inteiro à sua escolha, como por exemplo 3. Em seguida ... ->", "É necessário criar uma lógica que diminua essa variável em 1 sempre que o Pac-Man for atingido por um fantasma. Quando o valor da variável chegar a zero, uma mensagem de Game Over deve ser exibida na tela para o jogador, caso contrário as vidas irão diminuir até o infinito negativo.", " É fundamental lembrar que o operador = não serve para comparar valores, mas sim para atribuir um novo valor a uma variável — esse é um ponto chave da fase.","A lógica precisa ser detalhada com precisão. Apenas escrever - tirar uma vida - ou - game over - não será suficiente. O pseudocódigo deve deixar claro quando e como a variável de vidas é atualizada, qual é o evento que causa essa atualização (como uma colisão com um fantasma), e o que acontece pra haver a chamada da tela de game over." ]
+let textoMotivador = ["Nesta fase, o desafio é implementar um sistema de vidas para o Pac-Man utilizando pseudocódigo. Para isso, você deve declarar uma variável, e utilizando o sinal de igual, armazenar um valor para a quantidade de vidas do personagem, iniciando com um número inteiro à sua escolha, como por exemplo 3. Em seguida ... ->", "É necessário criar uma lógica que diminua essa variável em 1 sempre que o Pac-Man for atingido por um fantasma. Quando o valor da variável chegar a zero, uma mensagem de Game Over deve ser exibida na tela para o jogador, caso contrário as vidas irão diminuir até o infinito negativo. ->", " É fundamental lembrar que o operador = não serve para comparar valores, mas sim para atribuir um novo valor a uma variável — esse é um ponto chave da fase. ->","A lógica precisa ser detalhada com precisão. Apenas escrever - tirar uma vida - ou - game over - não será suficiente. O pseudocódigo deve deixar claro quando e como a variável de vidas é atualizada, qual é o evento que causa essa atualização (como uma colisão com um fantasma), e o que acontece pra haver a chamada da tela de game over." ]
 
 let contadorTexto = 0;
 let instrucao = document.querySelector('.instrucao')
@@ -1057,3 +1057,45 @@ document.querySelector('.proximoTexto').addEventListener('click', ()=>{
     document.querySelector('.proximoTexto').textContent = `Proximo ${contadorTexto+1}/4`
     instrucao.textContent = textoMotivador[contadorTexto]
 })
+
+let gravando = false;
+let recorder;
+let audioChunks = [];
+
+const botaoGravar = document.querySelector('#record-audio');
+
+botaoGravar.addEventListener("click", async () => {
+  if (!gravando) {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recorder = new MediaRecorder(stream);
+    audioChunks = [];
+
+    recorder.ondataavailable = (event) => {
+      audioChunks.push(event.data);
+    };
+
+    recorder.onstop = async () => {
+      const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+      const formData = new FormData();
+      formData.append("file", audioBlob, "audio.webm");
+
+      const response = await fetch("/api/audio", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      console.log("Texto do Whisper:", data.text);
+
+      document.getElementById("codigoUsuario").value += '\n\n' + data.text;
+    };
+
+    recorder.start();
+    gravando = true;
+    botaoGravar.textContent = "⏹️ Parar Gravação";
+  } else {
+    recorder.stop();
+    gravando = false;
+    botaoGravar.textContent = "🎤 Gravar Áudio";
+  }
+});

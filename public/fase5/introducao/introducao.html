@@ -29,6 +29,7 @@
             </p>
             <div class="next_back">
                 <a href="/fase4/"><button class="button-19" role="button">Voltar para fase 4</button></a>
+                <button aria-label="Ouvir Introdução" id="btn-read" class="button-19">🎤 Ouvir Introdução</button>
                 <button class="button-19 next" role="button">Próximo</button>
             </div>
         </div>
@@ -56,5 +57,30 @@
     </div>
     <script src="introducao/introducao.js"></script>
     <script src="../../compartilhado/fixação.js"></script>
+    <script>
+        const btnRead = document.getElementById("btn-read");
+        const texto = document.querySelector(".texto").textContent;
+
+        btnRead.addEventListener("click", () => {
+            const utterance = new SpeechSynthesisUtterance(texto);
+            utterance.lang = "pt-BR";
+            utterance.rate = 1;
+            utterance.pitch = 1; 
+            utterance.volume = 1;
+
+            window.speechSynthesis.speak(utterance);
+        });
+
+        // Cancela a fala ao sair da página
+        window.addEventListener("beforeunload", () => {
+            window.speechSynthesis.cancel();
+        });
+
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                window.speechSynthesis.cancel();
+            }
+        });
+    </script>
 </body>
 </html>

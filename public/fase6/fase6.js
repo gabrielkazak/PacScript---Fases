@@ -763,14 +763,23 @@ PERDE_PONTO = 10 (int)
 total_pontos = 0 (int)
 
 //Evento quando o Pac-man pega um ponto
-total_pontos +=VALOR_PONTO
+total_pontos +=VALOR_PONTO ou total_pontos = total_pontos = valor ponto
 
 //Evento quando o Pac-man bate nos fantasmas
-total_pontos -=PERDE_PONTO
+total_pontos -=PERDE_PONTO ou total_pontos = total_pontos - perde ponto
+
+ou 
+const valorPonto = 25 (int)
+const perdePonto = 10 (int)
+
+totalpontos = 0 (int)
+
+totalpontos += valorPonto
+totalpontos -= perdePonto
 
 
 Avalie o pseudocódigo fornecido pelo usuário e retorne:
-- Primeiro valor (índice 0): o valor numérico definido como incremento de pontuação (exemplo: 10), **somente se** o usuário definiu esse valor como uma **constante**, com nome todo em letras maiúsculas e com o tipo (int) indicado. Caso contrário, retorne 0.
+- Primeiro valor (índice 0): o valor numérico definido como incremento de pontuação (exemplo: 10), **somente se** o usuário definiu esse valor como uma **constante**,(de nome todo em letras maiúsculas ou acompanhado de 'const' antes da declaração do nome, qualquer uma das duas é valida) **com o tipo (int) ou inteiro por extenso** explicitado ao lado, como por exemplo: PONTOS = 10 (int) ou 10 inteiro. Caso contrário, retorne 0.
 - Segundo valor (índice 1): o valor inicial da pontuação total (exemplo: 0), **somente se** o usuário criou corretamente uma **variável** para armazenar a pontuação, com o tipo (int) indicado. Caso contrário, retorne 0.
 - Terceiro valor (índice 2): o valor numérico definido como penalidade (exemplo: 25), **somente se** o usuário definiu esse valor como uma **constante**, com nome todo em letras maiúsculas e com o tipo (int) indicado. Caso contrário, retorne 0.
 - Quarto valor (índice 3): true se o usuário criou corretamente a variável para iniciar a pontuação com o tipo (int) indicado, algo como totalPontos = 0(int);
@@ -971,7 +980,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });  
 
-let textoMotivador = ["Nesta fase, você aprenderá como simplificar operações matemáticas em variáveis utilizando os operadores de atribuição composta, como += e -=. Esses operadores permitem modificar o valor de uma variável de forma mais direta, tornando o código mais limpo e fácil de entender.", "Por exemplo, em vez de escrever pontuacao = pontuacao + 10, podemos simplesmente usar pontuacao += 10. Ou se tivermos uma variável ou constante com valor atribuido, como VALORPONTO = 10, podemos escrever pontuacao += VALORPONTO ", "Sua missão é criar um pequeno trecho de pseudocódigo onde o Pac-Man ganha e perde pontos. Para isso, defina duas constantes: uma para o valor de pontos ganhos por coleta e outra para o valor perdido ao sofrer dano. Em seguida, crie uma variável que armazene a pontuação atual e use os operadores += e -= para simular a coleta de pontos e a penalidade por ser atingido."," Lembre-se: constantes devem ser escritas em letras maiúsculas e não podem ser modificadas depois de declaradas!"]
+let textoMotivador = ["Nesta fase, você aprenderá como simplificar operações matemáticas em variáveis utilizando os operadores de atribuição composta, como += e -=. Esses operadores permitem modificar o valor de uma variável de forma mais direta, tornando o código mais limpo e fácil de entender. ->", "Por exemplo, em vez de escrever pontuacao = pontuacao + 10, podemos simplesmente usar pontuacao += 10. Ou se tivermos uma variável ou constante com valor atribuido, como VALORPONTO = 10, podemos escrever pontuacao += VALORPONTO ->", "Sua missão é criar um pequeno trecho de pseudocódigo onde o Pac-Man ganha e perde pontos. Para isso, defina duas constantes: uma para o valor de pontos ganhos por coleta e outra para o valor perdido ao sofrer dano. Em seguida, crie uma variável que armazene a pontuação atual e use os operadores += e -= para simular a coleta de pontos e a penalidade por ser atingido. ->"," Lembre-se: constantes devem ser escritas em letras maiúsculas e não podem ser modificadas depois de declaradas!"]
 
 let contadorTexto = 0;
 let instrucao = document.querySelector('.instrucao')
@@ -997,3 +1006,72 @@ document.querySelector('.proximoTexto').addEventListener('click', ()=>{
     document.querySelector('.proximoTexto').textContent = `Proximo ${contadorTexto+1}/4`
     instrucao.textContent = textoMotivador[contadorTexto]
 })
+
+function normalizarCodigo(fala) {
+  let codigo = fala.toLowerCase();
+
+  // Substituições de operadores
+  codigo = codigo.replace(/\bmais igual\b/g, "+=");
+  codigo = codigo.replace(/\bmenos igual\b/g, "-=");
+  codigo = codigo.replace(/\bigual a\b/g, "=");
+  codigo = codigo.replace(/\bmais\b/g, "+");
+  codigo = codigo.replace(/\bmenos\b/g, "-");
+  codigo = codigo.replace(/\bvezes\b/g, "*");
+  codigo = codigo.replace(/\bdividido\b/g, "/");
+  
+  codigo = codigo.replace(/\binteiro\b/g, "int");
+  codigo = codigo.replace(/\btexto\b/g, "string");
+  codigo = codigo.replace(/\bbooleano\b/g, "boolean");
+
+  codigo = codigo.replace(/\bpontos totais\b/g, "pontosTotais");
+  codigo = codigo.replace(/\bvalor ponto\b/g, "valorPonto");
+  codigo = codigo.replace(/\bperde ponto\b/g, "perdePonto");
+
+  return codigo;
+}
+
+
+let gravando = false;
+let recorder;
+let audioChunks = [];
+
+const botaoGravar = document.querySelector('#record-audio');
+
+botaoGravar.addEventListener("click", async () => {
+  if (!gravando) {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recorder = new MediaRecorder(stream);
+    audioChunks = [];
+
+    recorder.ondataavailable = (event) => {
+      audioChunks.push(event.data);
+    };
+
+    recorder.onstop = async () => {
+      const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+      const formData = new FormData();
+      formData.append("file", audioBlob, "audio.webm");
+
+      const response = await fetch("/api/audio", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+        let textoNormalizado = normalizarCodigo(data.text);
+
+        console.log("Texto normalizado:", textoNormalizado);
+
+        document.getElementById("codigoUsuario").value += '\n' + textoNormalizado;
+    };
+
+    recorder.start();
+    gravando = true;
+    botaoGravar.textContent = "⏹️ Parar Gravação";
+  } else {
+    recorder.stop();
+    gravando = false;
+    botaoGravar.textContent = "🎤 Gravar Áudio";
+  }
+});

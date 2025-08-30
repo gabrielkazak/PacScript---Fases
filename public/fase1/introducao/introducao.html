@@ -16,7 +16,7 @@
     </audio>  
     <div class="conteudo container">
         <div class="borda"></div>
-        <h1 class="titulo">Iniciando em Lógica de Programação</h1>
+        <h1 class="titulo">Iniciando em Lógica de Programação</h1> 
         <p class="texto">
         A lógica de programação é a base para quem quer aprender a programar. Ela envolve organizar ideias de forma estruturada para criar instruções que o computador entenda.
             <br>
@@ -29,8 +29,38 @@
     </div>
     <div class="next_back">
         <a href="/"><button class="button-19" role="button">Voltar para o menu</button></a>
+        <button aria-label="Ouvir instrução" id="btn-read" class="button-19">🎤 Ouvir Introdução</button>
         <a href="/fase1/"><button class="button-19 next" role="button">Ir para fase 1</button></a>
     </div>
     <script src="/compartilhado/fixação.js"></script>
+    
+
+    <script>
+        const btnRead = document.getElementById("btn-read");
+        const texto = document.querySelector(".texto").textContent;
+
+        btnRead.addEventListener("click", () => {
+            const utterance = new SpeechSynthesisUtterance(texto);
+            utterance.lang = "pt-BR";
+            utterance.rate = 1;
+            utterance.pitch = 1; 
+            utterance.volume = 1;
+
+            window.speechSynthesis.speak(utterance);
+        });
+
+        // Cancela a fala ao sair da página
+        window.addEventListener("beforeunload", () => {
+            window.speechSynthesis.cancel();
+        });
+
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                window.speechSynthesis.cancel();
+            }
+        });
+    </script>
+
+
 </body>
 </html>

@@ -15,6 +15,55 @@ body{
     overflow: hidden;
 }
 
+@media (max-width: 840px) {
+    body {
+        flex-direction: column;
+        height: auto;
+        padding: 20px 0;
+    }
+
+    .setorPrompt {
+        width: 400px;
+        margin-bottom: 20px;
+    }
+
+    .jogo__base {
+        width: 90vw;
+        height: auto;
+    }
+
+    .cabecalho {
+        width: 90%;
+        margin-bottom: 20px;
+        margin-right: 0;
+    }
+
+    .setorPrompt {
+        width: 90%;
+        margin-bottom: 20px;
+    }
+
+    .input {
+        height: 150px;
+    }
+
+    .inst_conjunto {
+        height: auto;
+    }
+
+    .gameOver {
+        width: 90%;
+    }
+
+    .dica {
+        width: 80%;
+        height: auto;
+        top: 10%;
+        left: 10%;
+        border: 5px solid var(--amarelo);
+    }
+}
+
 a{
     text-decoration: none;
 }
@@ -125,7 +174,7 @@ canvas {
 .instrucao{
     overflow-y:scroll;
     font-family: var(--fonte-principal);
-    font-weight: 500;
+    font-weight: bold;
     font-size: 20px;
     line-height: 24px;
     color: white;
@@ -399,3 +448,62 @@ canvas {
     background: rgba(0, 0, 0, .08);
     color: rgba(0, 0, 0, .3);
   }
+
+  
+@media (max-width: 1040px) {
+  body {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+    padding: 20px 0;
+    overflow-y: auto;
+  }
+
+  .setorPrompt{
+    margin-left: 20px;
+    width: 98%;
+    margin-bottom: 20px;
+  }
+
+  .cabecalho {
+    margin-right: 0;
+  }
+
+  .jogo__base {
+    height: auto;
+  }
+
+  .input {
+    height: 150px;
+  }
+
+  .inst_conjunto {
+    height: auto;
+  }
+
+  .dica {
+    height: auto;
+    top: 5%;
+    left: 5%;
+    width: 90%;
+    transform: none;
+    padding: 1rem;
+    border: 5px solid var(--amarelo);
+  }
+
+  .placar,
+  .vidas {
+    position: relative;
+    left: auto;
+    top: auto;
+    text-align: center;
+    width: 100%;
+    margin: 10px 0;
+    font-size: 24px;
+  }
+}
+
+a {
+  text-decoration: none;
+}

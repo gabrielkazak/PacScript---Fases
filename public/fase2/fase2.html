@@ -30,6 +30,7 @@
             </p>
             <div class="botoesTexto">
                 <button class="voltarTexto txtbtn">Voltar</button>
+                <button aria-label="Ouvir Texto" id="btn-read" class="button-18">🎤 Ouvir Texto</button>
                 <button class="proximoTexto txtbtn">Proximo 1/4</button>
             </div>
         </div>
@@ -41,7 +42,8 @@
 // Crie a logica de movimento aqui
         </textarea>
         <div class="botoes">
-            <button class="button-18" id="botaoDica" role="button">Dica 0/3</button>  
+            <button class="button-18" id="botaoDica" role="button">Dica 0/3</button> 
+            <button aria-label="Gravar audio" class="button-18" id="record-audio">Gravar Audio</button> 
             <button class="button-18" id="botao" role="button">Testar</button>
             <a href="/fase3/introducao" class="button-18 avancar" id="avancar" role="button">Avançar</a>
         </div>
@@ -60,6 +62,29 @@
     
     <script type="module" src="fase2.js"></script>
     <script src="../compartilhado/persistencia.js"></script>
+    <script>
+        const btnRead = document.getElementById("btn-read");
+        btnRead.addEventListener("click", () => {
+            const texto = document.querySelector(".instrucao").textContent;
+            const utterance = new SpeechSynthesisUtterance(texto);
+            utterance.lang = "pt-BR";
+            utterance.rate = 1;
+            utterance.pitch = 1; 
+            utterance.volume = 1;
+
+            window.speechSynthesis.speak(utterance);
+        });
+
+        window.addEventListener("beforeunload", () => {
+            window.speechSynthesis.cancel();
+        });
+
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                window.speechSynthesis.cancel();
+            }
+        });
+    </script>
 
 </body>
 </html>

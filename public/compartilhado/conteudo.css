@@ -252,3 +252,63 @@ body{
   display: flex;
   justify-content: space-evenly;
 }
+
+@media (max-width: 840px) {
+  body {
+    height: 100vh;
+    padding: 1rem;
+  }
+
+  .container {
+    width: 95%;
+    padding: 1rem;
+    height: auto;
+    padding-top: 50px;
+  }
+
+  .titulo {
+    font-size: 24px;
+    text-align: center;
+  }
+
+  .texto {
+    font-size: 16px;
+  }
+
+  .conteudo {
+    height: auto;
+    padding-right: 8px;
+  }
+
+  .resposta {
+    font-size: 14px;
+    padding: 0.8rem;
+    width: 100%; /* Garante que a resposta ocupe a largura total */
+  }
+
+  .button-19 {
+    width: 100%;
+    font-size: 14px;
+    padding: 12px;
+  }
+
+  .botoes {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .pontuação {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .pontosTXT,
+  .pontosUsuario {
+    font-size: 24px;
+  }
+
+  .next_back {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

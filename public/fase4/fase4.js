@@ -109,3 +109,62 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = '/'
     }
   });  
+
+let gravando = false;
+let recorder;
+let audioChunks = [];
+
+const botaoGravar = document.querySelector('#record-audio');
+let indiceAtual = 0;
+
+botaoGravar.addEventListener("click", async () => {
+  if (!gravando) {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recorder = new MediaRecorder(stream);
+    audioChunks = [];
+
+    recorder.ondataavailable = (event) => {
+      audioChunks.push(event.data);
+    };
+
+    recorder.onstop = async () => {
+      const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+      const formData = new FormData();
+      formData.append("file", audioBlob, "audio.webm");
+
+      // Envia para o backend
+      const response = await fetch("/api/audio", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      console.log("Texto do Whisper:", data.text);
+
+      // Preenche os selects automaticamente
+      const fala = data.text.toLowerCase().trim();
+      const selects = document.querySelectorAll(".options");
+      let valor = "";
+
+      if (fala.includes("string")) valor = "string";
+      else if (fala.includes("boolean") || fala.includes("boleano")) valor = "booleano";
+      else if (fala.includes("float") || fala.includes("flut")) valor = "float";
+      else if (fala.includes("int") || fala.includes("inteiro")) valor = "int";
+
+      if (valor && selects[indiceAtual]) {
+        selects[indiceAtual].value = valor;
+        indiceAtual = (indiceAtual + 1) % selects.length; // passa pro próximo
+      }
+
+      botaoGravar.textContent = "🎤 Gravar Áudio";
+    };
+
+    recorder.start();
+    gravando = true;
+    botaoGravar.textContent = "⏹️ Parar Gravação";
+  } else {
+    recorder.stop();
+    gravando = false;
+    botaoGravar.textContent = "🎤 Gravar Áudio";
+  }
+});

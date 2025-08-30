@@ -115,3 +115,73 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });  
 
+function normalizarOperadores(speech) {
+    let code = speech.toLowerCase();
+
+    // Basic logical operators
+    code = code.replace(/\band\b/g, "&&");
+    code = code.replace(/\bor\b/g, "||");
+    code = code.replace(/\bnot\b/g, "!");
+
+    // Combined negation
+    code = code.replace(/\band not\b/g, "&& !");
+    code = code.replace(/\bor not\b/g, "|| !");
+
+    return code;
+}
+
+
+let gravando = false;
+let recorder;
+let audioChunks = [];
+
+const botaoGravar = document.querySelector('#record-audio');
+let indiceAtual = 0;
+
+botaoGravar.addEventListener("click", async () => {
+  if (!gravando) {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recorder = new MediaRecorder(stream);
+    audioChunks = [];
+
+    recorder.ondataavailable = (event) => {
+      audioChunks.push(event.data);
+    };
+
+    recorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+        const formData = new FormData();
+        formData.append("file", audioBlob, "audio.webm");
+
+        // Envia para o backend
+        const response = await fetch("/api/audio", {
+            method: "POST",
+            body: formData,
+        });
+
+        const data = await response.json();
+        console.log("Texto do Whisper:", data.text);
+
+        // Normaliza operadores
+        const falaNormalizada = normalizarOperadores(data.text);
+
+        // Preenche os selects automaticamente
+        const selects = document.querySelectorAll(".options");
+
+        if (selects[indiceAtual]) {
+            selects[indiceAtual].value = falaNormalizada;
+            indiceAtual = (indiceAtual + 1) % selects.length;
+        }
+
+        botaoGravar.textContent = "🎤 Gravar Áudio";
+        };
+
+    recorder.start();
+    gravando = true;
+    botaoGravar.textContent = "⏹️ Parar Gravação";
+  } else {
+    recorder.stop();
+    gravando = false;
+    botaoGravar.textContent = "🎤 Gravar Áudio";
+  }
+});
